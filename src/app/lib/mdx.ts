@@ -47,7 +47,7 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
       ...data,
       content,
     } as Post;
-  } catch (error) {
+  } catch {
     return null;
   }
 }

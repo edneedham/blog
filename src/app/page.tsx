@@ -6,7 +6,7 @@ export default function Home() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
-      <h1 className="text-4xl font-bold mb-8">Ed Needham's Blog</h1>
+      <h1 className="text-4xl font-bold mb-8">Ed Needham&apos;s Blog</h1>
       
       {posts.length === 0 ? (
         <p className="text-gray-600">No posts yet. Create your first post in the <code className="bg-gray-100 px-2 py-1 rounded">/posts</code> directory!</p>

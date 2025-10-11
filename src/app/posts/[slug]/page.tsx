@@ -3,16 +3,17 @@ import { getPostBySlug, getAllPostSlugs } from '@/app/lib/mdx';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import Link from 'next/link';
 import { Callout } from '@/app/components/Callout';
+import type { HTMLProps } from 'react';
 
 // Custom components you can use in MDX
 const components = {
   Callout,
-  h1: (props: any) => <h1 className="text-4xl font-bold mb-4" {...props} />,
-  h2: (props: any) => <h2 className="text-3xl font-bold mb-3 mt-8" {...props} />,
-  p: (props: any) => <p className="mb-4 leading-relaxed" {...props} />,
-  a: (props: any) => <a className="text-blue-600 hover:underline" {...props} />,
-  code: (props: any) => <code className="bg-gray-100 px-1 py-0.5 rounded" {...props} />,
-  pre: (props: any) => <pre className="bg-gray-900 text-white p-4 rounded-lg overflow-x-auto mb-4" {...props} />,
+  h1: (props: HTMLProps<HTMLHeadingElement>) => <h1 className="text-4xl font-bold mb-4" {...props} />,
+  h2: (props: HTMLProps<HTMLHeadingElement>) => <h2 className="text-3xl font-bold mb-3 mt-8" {...props} />,
+  p: (props: HTMLProps<HTMLParagraphElement>) => <p className="mb-4 leading-relaxed" {...props} />,
+  a: (props: HTMLProps<HTMLAnchorElement>) => <a className="text-blue-600 hover:underline" {...props} />,
+  code: (props: HTMLProps<HTMLElement>) => <code className="bg-gray-100 px-1 py-0.5 rounded" {...props} />,
+  pre: (props: HTMLProps<HTMLPreElement>) => <pre className="bg-gray-900 text-white p-4 rounded-lg overflow-x-auto mb-4" {...props} />,
 };
 
 export async function generateStaticParams() {
