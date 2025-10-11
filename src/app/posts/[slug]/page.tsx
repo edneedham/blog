@@ -53,6 +53,11 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
         <div className="text-gray-600 text-sm">
           <time>{post.date}</time>
           {post.author && <span> • {post.author}</span>}
+          {post.category && (
+            <span className="ml-2 bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs uppercase">
+              {post.category}
+            </span>
+          )}
         </div>
         {post.tags && (
           <div className="flex gap-2 mt-3">

@@ -10,6 +10,7 @@ export interface PostMetadata {
   excerpt: string;
   author?: string;
   tags?: string[];
+  category?: string;
   slug: string;
 }
 
@@ -57,4 +58,14 @@ export function getAllPostSlugs(): string[] {
   return fileNames
     .filter(fileName => fileName.endsWith('.mdx'))
     .map(fileName => fileName.replace(/\.mdx$/, ''));
+}
+
+export function getPostsByCategory(category: string): PostMetadata[] {
+  return getAllPosts().filter(post => post.category === category);
+}
+
+export function getAllCategories(): string[] {
+  const posts = getAllPosts();
+  const categories = new Set(posts.map(post => post.category).filter(Boolean));
+  return Array.from(categories) as string[];
 }
