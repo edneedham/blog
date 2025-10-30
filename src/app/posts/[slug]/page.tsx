@@ -2,12 +2,11 @@ import { notFound } from 'next/navigation';
 import { getPostBySlug, getAllPostSlugs } from '@/app/lib/mdx';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import Link from 'next/link';
-import { Callout } from '@/app/components/Callout';
+import Image from 'next/image';
 import type { HTMLProps } from 'react';
 
 // Custom components you can use in MDX
 const components = {
-  Callout,
   h1: (props: HTMLProps<HTMLHeadingElement>) => <h1 className="text-4xl font-bold mb-4" {...props} />,
   h2: (props: HTMLProps<HTMLHeadingElement>) => <h2 className="text-3xl font-bold mb-3 mt-8" {...props} />,
   p: (props: HTMLProps<HTMLParagraphElement>) => <p className="mb-4 leading-relaxed" {...props} />,
@@ -63,7 +62,16 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
           <div className="flex gap-2 mt-3">
             {post.tags.map(tag => (
               <span key={tag} className="bg-gray-200 px-2 py-1 rounded text-sm">
-                {tag}
+                {tag === 'En Punto' ? (<div className="flex items-center gap-2">
+                  <span>En Punto</span>
+                  <Image 
+                    src="/enpunto.webp" 
+                    alt="En Punto" 
+                    width={20} 
+                    height={20}
+                    className="rounded"
+                  />
+                </div>) : tag}
               </span>
             ))}
           </div>
