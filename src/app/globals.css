@@ -2,7 +2,7 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #000000;
 }
 
 @theme inline {
@@ -12,15 +12,38 @@
   --font-mono: var(--font-geist-mono);
 }
 
+.light-mode-hidden {
+  display: none;
+}
+
+.dark-mode-hidden {
+  display: block;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #000000;
+    --foreground: #ffffff;
+
+  }
+  .light-mode-hidden {
+    display: block;
+  }
+
+  .dark-mode-hidden {
+    display: none;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+}
+
+/* Character-based line length control */
+.content-width {
+  max-width: clamp(45ch, 90vw, 65ch);
+  margin-left: auto;
+  margin-right: auto;
 }
