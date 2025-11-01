@@ -1,25 +1,25 @@
 ---
-date: "2023-02-01"
-title: "Iterating Through Trees In Rust"
-excerpt: "Discussion on implementing iterators for tree-like data structures."
-tags: ["Rust", "Iterators", "Trees"]
-category: "general"
+date: '2023-02-01'
+title: 'Iterating Through Trees In Rust'
+excerpt: 'Discussion on implementing iterators for tree-like data structures.'
+tags: ['Rust', 'Iterators', 'Trees']
+category: 'general'
 ---
 
 ## Introduction
 
-*This article assumes that the reader has read 
-[The Rust Programming Language Book](https://doc.Rust-lang.org/book/) 
-and has good familiarity with the language.* 
+_This article assumes that the reader has read
+[The Rust Programming Language Book](https://doc.Rust-lang.org/book/)
+and has good familiarity with the language._
 The full source code can be found on my [Github](https://github.com/edneedham/iterators).
 
 This article covers `iter`, `iter_mut` and `into_iter` and the `Iterator`
-and `IntoIterator` traits. Its aim is to aid in the reader's 
-understanding more than as a how-to guide. Most programmers will be 
-familiar with Binary Search Trees, so we avoid going too much into their 
+and `IntoIterator` traits. Its aim is to aid in the reader's
+understanding more than as a how-to guide. Most programmers will be
+familiar with Binary Search Trees, so we avoid going too much into their
 details.
 
-## A Wrong Turn 
+## A Wrong Turn
 
 With limited Rust knowledge and a typical algorithms textbook the first design
 will likely look like this:
@@ -42,21 +42,21 @@ pub struct Node<K, V> {
 }
 ```
 
-This will only end in tears, I'm afraid. See, in order for a child node to 
-mutate its parent it has to hold a mutable reference to the parent, but 
-a node can have *two* children so that means *two* mutable references to the 
-parent, which in Rust's world is **no bueno**. 
+This will only end in tears, I'm afraid. See, in order for a child node to
+mutate its parent it has to hold a mutable reference to the parent, but
+a node can have _two_ children so that means _two_ mutable references to the
+parent, which in Rust's world is **no bueno**.
 
 So where do we go from here?
 
-Well, if we knew that our implementation was sound and the compiler 
-was simply being too pedantic, we could move the borrow checking from compile 
-time to runtime by wrapping the nodes in 
-[refcells](https://doc.Rust-lang.org/std/cell/struct.RefCell.html) 
-but in our case this still won't work because the design of the data 
+Well, if we knew that our implementation was sound and the compiler
+was simply being too pedantic, we could move the borrow checking from compile
+time to runtime by wrapping the nodes in
+[refcells](https://doc.Rust-lang.org/std/cell/struct.RefCell.html)
+but in our case this still won't work because the design of the data
 structure needs to change.
 
-## Back On Track 
+## Back On Track
 
 What if we removed the parent pointer?
 
@@ -76,13 +76,13 @@ pub struct Node<K, V> {
     pub value: V,
 ```
 
-Now we have gone from our doubly-linked design to more of a singly-linked 
+Now we have gone from our doubly-linked design to more of a singly-linked
 one, which means each node no longer has multiple mutable references.
 
 We can implement some methods to create a new tree node and a way of inserting
-them into the tree. As we will be determining the tree structure by the keys, 
+them into the tree. As we will be determining the tree structure by the keys,
 we need to give `K`
-the trait bound of `Ord` and as we will be checking for a values presence in 
+the trait bound of `Ord` and as we will be checking for a values presence in
 the tree we can use the more permissive `PartialEq` trait bound for `V`.
 
 ```Rust
@@ -114,40 +114,39 @@ impl<K: Ord, V: PartialEq> BST<K, V> {
 
 #### Balance Without Rebalancing
 
-One area we haven't addressed is that `insert` produces a singly-linked list 
-when given a sequence of nodes that is already ordered by their keys e.g. 
-(1, 2, 3, 4, 5). In this case, the tree would then need to be able to 
-rebalance itself. As we are only trying to cover iteration, a rebalancing 
-tree is beyond the scope of this article. Nor do we cover the case of 
+One area we haven't addressed is that `insert` produces a singly-linked list
+when given a sequence of nodes that is already ordered by their keys e.g.
+(1, 2, 3, 4, 5). In this case, the tree would then need to be able to
+rebalance itself. As we are only trying to cover iteration, a rebalancing
+tree is beyond the scope of this article. Nor do we cover the case of
 duplicate keys. We make sure to avoid these cases in our testing.
 
 ## Iter
 
-As trees are recursive structures many of the algorithms that work on 
-trees utilise recursion, but as recursion is just using the program's call 
-stack (which is more limited in space), we can just use a stack data 
+As trees are recursive structures many of the algorithms that work on
+trees utilise recursion, but as recursion is just using the program's call
+stack (which is more limited in space), we can just use a stack data
 structure for the iterative version.
 
 In order for a type to provide iteration it has to implement the `Iterator`
-trait. How do you implement the `Iterator` trait for a tree when there are 
-multiple ways of traversing one? 
+trait. How do you implement the `Iterator` trait for a tree when there are
+multiple ways of traversing one?
 
-We have to wrap the root of the tree in three different wrapper types 
-and implement the `Iterator` trait and the various traversal methods on each 
+We have to wrap the root of the tree in three different wrapper types
+and implement the `Iterator` trait and the various traversal methods on each
 one.
 
 #### Inorder
 
-For inorder traversal we visit nodes from the left subtree first, followed 
+For inorder traversal we visit nodes from the left subtree first, followed
 by the root and then the right subtree.
 
 First, we add the `InOrderIter` type which is a struct wrapper for iteration.
-`InOrderIter` has two fields: `stack` which is a `vec` containing references 
-to optional tree nodes that is used to hold the state of the iterator, 
-permitting a depth-first approach; and `current` which is 
-used to hold an optional reference to a node allowing for the iterator to 
+`InOrderIter` has two fields: `stack` which is a `vec` containing references
+to optional tree nodes that is used to hold the state of the iterator,
+permitting a depth-first approach; and `current` which is
+used to hold an optional reference to a node allowing for the iterator to
 move back up the tree.
-
 
 ```Rust
 pub struct InOrderIter<'a, K, V> {
@@ -156,11 +155,11 @@ pub struct InOrderIter<'a, K, V> {
 }
 ```
 
-Next, we add the `inorder` method to the tree implementation: 
+Next, we add the `inorder` method to the tree implementation:
 
 ```Rust
 impl<K: Ord, V: PartialEq> BST<K, V> {
-    
+
     /*...*/
 
     pub fn inorder<'a>(&'a self) -> InorderIter<'a, K, V> {
@@ -169,40 +168,39 @@ impl<K: Ord, V: PartialEq> BST<K, V> {
             current: self.root.as_ref(),
         }
     }
-    
+
     /*...*/
 
     }
 }
 ```
 
-Here we instantiate the `InOrderIter` struct and pass in a reference to the 
-tree's root in the `current` field. As we only want to borrow the nodes of 
-the tree we have to tell the compiler that we will be keeping the 
-`InOrderIter` around at most as long as the underlying tree that we're 
+Here we instantiate the `InOrderIter` struct and pass in a reference to the
+tree's root in the `current` field. As we only want to borrow the nodes of
+the tree we have to tell the compiler that we will be keeping the
+`InOrderIter` around at most as long as the underlying tree that we're
 borrowing from. We do that by providing the same lifetime annotations: `'a`.
 
-These lifetime annotations are used throughout the `Iter` and `ValuesMut` 
+These lifetime annotations are used throughout the `Iter` and `ValuesMut`
 traversals because they all borrow from the underlying tree.
 
-Finally, we implement the `Iterator` trait for the `InOrderIter` type, which 
+Finally, we implement the `Iterator` trait for the `InOrderIter` type, which
 means implementing the `next` method:
-
 
 ```Rust
 impl<'a, K: Ord, V: PartialEq> Iterator for InOrderIter<'a, K, V> {
-    type Item = (&'a K, &'a V); 
+    type Item = (&'a K, &'a V);
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
             if let Some(current) = self.current {
                 self.stack.push(self.current);
                 self.current = current.left.as_ref();
-            } else { 
+            } else {
                 if let Some(node) = self.stack.pop() {
                     let popped = node.unwrap();
                     let result = (&popped.key, &popped.value);
-                    self.current = popped.right.as_ref(); 
+                    self.current = popped.right.as_ref();
                     return Some(result);
                 } else {
                     return None;
@@ -214,32 +212,32 @@ impl<'a, K: Ord, V: PartialEq> Iterator for InOrderIter<'a, K, V> {
 }
 ```
 
-The `type Item` in the body of the `impl` block is an associated type on 
-the `Iterator` trait and becomes concrete on the implementation. 
-For us this means that the `type Item` is referring to the value or *Item* we 
-want to return from the iterator. So when `next` returns an 
+The `type Item` in the body of the `impl` block is an associated type on
+the `Iterator` trait and becomes concrete on the implementation.
+For us this means that the `type Item` is referring to the value or _Item_ we
+want to return from the iterator. So when `next` returns an
 `Option<Self::Item>` we are actually saying `Option<(&'a K, &'a V)` with Self
-referring to this very implementation of the `Iterator` trait. 
-Associated types are mainly used to improve the readability of the iterators 
+referring to this very implementation of the `Iterator` trait.
+Associated types are mainly used to improve the readability of the iterators
 return type.
 
 Each call to `next` triggers a `loop` that fills the `stack` with
-all of the current node's left descendants starting with the current node. 
-This is how the ordering of nodes is kept to 'inorder'. 
-We exhaust all of the left descendants from the current node and move into 
-the last added child by popping it from the `stack`. We need to `unwrap` it 
-to remove the `Option` to get at the node's fields, this allows us to take a 
-reference to its key and value and produce a result. We then update 
-`self.current` to hold a reference to the popped node's right child and exit 
-the loop by returning either the `result`; or `None` if the `stack` was empty 
+all of the current node's left descendants starting with the current node.
+This is how the ordering of nodes is kept to 'inorder'.
+We exhaust all of the left descendants from the current node and move into
+the last added child by popping it from the `stack`. We need to `unwrap` it
+to remove the `Option` to get at the node's fields, this allows us to take a
+reference to its key and value and produce a result. We then update
+`self.current` to hold a reference to the popped node's right child and exit
+the loop by returning either the `result`; or `None` if the `stack` was empty
 and `self.current` was `None`.
 
-Below is a test for the inorder traversal of our tree. As mentioned in [*Balance Without Rebalancing*](#balance), 
+Below is a test for the inorder traversal of our tree. As mentioned in [_Balance Without Rebalancing_](#balance),
 to keep the height of the tree to a minimum, retain balance and prevent
-us from producing a singly-linked list, we need a specific insertion order 
-for the nodes in the tree. To encapsulate these properties, we have wrapped 
-it in its own helper function to be used across all tests. This will also 
-give us a clear idea as to the correct order of nodes returned from each 
+us from producing a singly-linked list, we need a specific insertion order
+for the nodes in the tree. To encapsulate these properties, we have wrapped
+it in its own helper function to be used across all tests. This will also
+give us a clear idea as to the correct order of nodes returned from each
 traversal method.
 
 ```Rust
@@ -286,13 +284,11 @@ mod tests {
 }
 ```
 
-
-Running the test we get this output:  
+Running the test we get this output:
 
 ```shell
 $ cargo test inorder
 ```
-
 
 ```shell
 running 1 test
@@ -302,22 +298,21 @@ test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; fini
 
 ```
 
-The passing test indicates that the nodes are visited inorder. The 
-assertions in our test show that as we move through the nodes in the tree 
-by calling `iter.next` we return the nodes ordered by key from smallest to 
+The passing test indicates that the nodes are visited inorder. The
+assertions in our test show that as we move through the nodes in the tree
+by calling `iter.next` we return the nodes ordered by key from smallest to
 biggest.
 
-***All further testing is omitted from the rest of this article and can be 
-found in the repo on my [Github](https://github.com/edneedham/iterators).***
-
+**_All further testing is omitted from the rest of this article and can be
+found in the repo on my [Github](https://github.com/edneedham/iterators)._**
 
 #### Preorder
 
 For preorder traversal we visit the current node first, followed by
 the left and then the right subtree.
 
-The struct wrapper for preorder is a little different to the inorder 
-struct as we do away with the current field. Preorder is altogether a more 
+The struct wrapper for preorder is a little different to the inorder
+struct as we do away with the current field. Preorder is altogether a more
 simple means of tree traversal.
 
 ```Rust
@@ -327,12 +322,11 @@ pub struct PreOrderIter<'a, K, V> {
 
 ```
 
-
 We can then add the `preorder` method to the tree implementation:
 
 ```Rust
 impl<K: Ord, V: PartialEq> BST<K, V> {
-    
+
     /*...*/
 
     pub fn preorder<'a>(&'a self) -> PreOrderIter<'a, K, V> {
@@ -340,17 +334,17 @@ impl<K: Ord, V: PartialEq> BST<K, V> {
             stack: vec![self.root.as_ref()],
         }
     }
-    
+
     /*...*/
 
     }
 ```
 
-Since preorder traversal visits the current node first, the tree's root is 
-added to the stack right from the start because it is the common ancestor of 
+Since preorder traversal visits the current node first, the tree's root is
+added to the stack right from the start because it is the common ancestor of
 all nodes.
 
-Finally, we implement the `Iterator` trait for the `PreOrderIter` type by 
+Finally, we implement the `Iterator` trait for the `PreOrderIter` type by
 implementing the `next` method:
 
 ```Rust
@@ -376,21 +370,20 @@ impl<'a, K: Ord, V> Iterator for PreOrderIter<'a, K, V> {
 }
 ```
 
-Each call to `next` will check if popping from the `stack` returns a `Some` 
-variant, if it does, we `unwrap` the popped node and take a reference to its 
-key and value and put them in the `result`. By pushing the right child onto 
-the `stack` first, we ensure that the right child is popped last, *after* 
+Each call to `next` will check if popping from the `stack` returns a `Some`
+variant, if it does, we `unwrap` the popped node and take a reference to its
+key and value and put them in the `result`. By pushing the right child onto
+the `stack` first, we ensure that the right child is popped last, _after_
 the left child. This is how we maintain preorder iteration. Lastly, `next`
-returns to the caller by returning either the current node's key & value or 
+returns to the caller by returning either the current node's key & value or
 `None`.
-
 
 #### Postorder
 
-For postorder traversal we visit the right subtree first, followed by the 
+For postorder traversal we visit the right subtree first, followed by the
 left subtree and then the current node.
 
-Like we did with InOrderIter we require a current field, without it we lack 
+Like we did with InOrderIter we require a current field, without it we lack
 the state to be able to move back to older generations in the tree.
 
 ```Rust
@@ -400,12 +393,12 @@ pub struct PostOrderIter<'a, K: Ord, V> {
 }
 ```
 
-We add the `postorder` method to the tree implementation, which is very 
+We add the `postorder` method to the tree implementation, which is very
 similar to the `inorder` method:
 
 ```Rust
 impl<K: Ord, V: PartialEq> BST<K, V> {
-    
+
     /*...*/
 
     pub fn postorder<'a>(&'a self) -> PostOrderIter<'a, K, V> {
@@ -414,14 +407,14 @@ impl<K: Ord, V: PartialEq> BST<K, V> {
             current: self.root.as_ref(),
         }
     }
-    
+
     /*...*/
 
     }
 }
 ```
 
-Implementing the next method for our PostOrderIter is a little more 
+Implementing the next method for our PostOrderIter is a little more
 challenging than PreOrderIter and InOrderIter:
 
 ```Rust
@@ -438,7 +431,7 @@ impl<'a, K: Ord, V: PartialEq> Iterator for PostOrderIter<'a, K, V> {
                 self.current = current.left.as_ref();
             } if self.stack.is_empty() {
                 return None;
-            } 
+            }
             if let Some(node) = self.stack.pop() {
                 let popped = node.unwrap();
                 if !self.stack.is_empty() && popped.right.is_some() &&
@@ -453,40 +446,39 @@ impl<'a, K: Ord, V: PartialEq> Iterator for PostOrderIter<'a, K, V> {
                     self.current = None;
                     return Some(result);
                 }
-            } 
+            }
         }
     }
 }
 ```
 
-Like with `InOrderIter`, on each call to next we have to make sure to 
-maintain a route back through the tree as `PostOrderIter` does not take a 
-linear path like `PreOrderIter`, hence the inclusion of the `current` field. 
+Like with `InOrderIter`, on each call to next we have to make sure to
+maintain a route back through the tree as `PostOrderIter` does not take a
+linear path like `PreOrderIter`, hence the inclusion of the `current` field.
 
-By wrapping the code in a `loop` we allow the rest of the code to prioritise 
-the left leaf nodes of the tree, visiting them first when possible. 
-Each call to `next` adds its right child and itself to the `stack` while 
+By wrapping the code in a `loop` we allow the rest of the code to prioritise
+the left leaf nodes of the tree, visiting them first when possible.
+Each call to `next` adds its right child and itself to the `stack` while
 moving `self.current` to its leftmost descendant.
-Once `self.current` is `None`, we check to see if the `stack` is empty, 
-because if `self.current` is `None` and the `stack` is empty; all nodes have 
-been visited and we return with `None` to the caller, exiting the `loop` in 
-the process. If the `stack` is not empty then we check to see if the popped node has added its right child to the `stack`, if it has, we remove it, add the 
-popped node back on the `stack` (which will be returned out of the iterator 
-the next time we call pop on the stack) and then move into the popped node's 
+Once `self.current` is `None`, we check to see if the `stack` is empty,
+because if `self.current` is `None` and the `stack` is empty; all nodes have
+been visited and we return with `None` to the caller, exiting the `loop` in
+the process. If the `stack` is not empty then we check to see if the popped node has added its right child to the `stack`, if it has, we remove it, add the
+popped node back on the `stack` (which will be returned out of the iterator
+the next time we call pop on the stack) and then move into the popped node's
 right child. The right node will then be passed through the body of the while
 `loop`. We do this until we reach either of the exit clauses.
-
 
 ## IterMut
 
 `Iter` only provides shared references to items in the underlying collection,
-if we wanted to *do* anything to the item returned via iteration we need an 
+if we wanted to _do_ anything to the item returned via iteration we need an
 exclusive reference.
 
-`IterMut`, however, *cannot* return the key, as any mutation on the key would 
+`IterMut`, however, _cannot_ return the key, as any mutation on the key would
 invalidate the invariant of the tree. Instead, we just return the value stored
-at that key's respective node and not the key itself. Therefore, it makes 
-more sense to call this struct `ValuesMut`, where we return a mutable 
+at that key's respective node and not the key itself. Therefore, it makes
+more sense to call this struct `ValuesMut`, where we return a mutable
 iterator over the values. As we are still using references we also still need
 to provide lifetimes like with the Iter traversal methods.
 
@@ -496,11 +488,11 @@ pub struct ValuesMut<'a, K, V> {
 }
 ```
 
-A significant difference between `ValuesMut` and the previous iterators is 
-that instead of using a stack and a depth-first approach we use a queue and a 
-breadth-first approach. The standard library has `VecDeque` which is a 
+A significant difference between `ValuesMut` and the previous iterators is
+that instead of using a stack and a depth-first approach we use a queue and a
+breadth-first approach. The standard library has `VecDeque` which is a
 collection type that enables First-In-First-Out (FIFO) operations, giving us
-the ability to traverse the tree an entire level at a time (breadth-first). 
+the ability to traverse the tree an entire level at a time (breadth-first).
 
 ```Rust
 impl<K: Ord, V: PartialEq> BST<K, V> {
@@ -520,8 +512,9 @@ impl<K: Ord, V: PartialEq> BST<K, V> {
     /*...*/
 }
 ```
-We instantiate queue with a mutable reference to the root of the tree, 
-much like we would do when instantiating a stack, except the standard 
+
+We instantiate queue with a mutable reference to the root of the tree,
+much like we would do when instantiating a stack, except the standard
 library's `VecDeque` does not include a macro for easy initialisation.
 
 ```Rust
@@ -545,19 +538,19 @@ impl<'a, K: Ord, V: PartialEq> Iterator for ValuesMut<'a, K, V> {
 }
 ```
 
-On each call, we `pop` a node from the front of the `queue`, if the current 
-node has a left child we `push` a mutable reference to the left child on the 
-back of the `queue`, so that when we `pop` from the front of the `queue` with 
-subsequent calls to `next`, the left child is popped first. If the current 
-node has a right child then we push a mutable reference to it to the back of 
-the `queue`. Finally, we return a mutable reference to the current node's 
+On each call, we `pop` a node from the front of the `queue`, if the current
+node has a left child we `push` a mutable reference to the left child on the
+back of the `queue`, so that when we `pop` from the front of the `queue` with
+subsequent calls to `next`, the left child is popped first. If the current
+node has a right child then we push a mutable reference to it to the back of
+the `queue`. Finally, we return a mutable reference to the current node's
 value or return `None`.
 
 ## IntoIter
 
-For `IntoIter` we can create another struct that holds a `stack` of the 
-tree's nodes. A significant difference here, compared to the previous 
-sections, is that in `IntoIter` we don't use references – we are actually 
+For `IntoIter` we can create another struct that holds a `stack` of the
+tree's nodes. A significant difference here, compared to the previous
+sections, is that in `IntoIter` we don't use references – we are actually
 moving values.
 
 ```Rust
@@ -566,7 +559,7 @@ pub struct IntoIter<K, V> {
 }
 ```
 
-No longer do we add an iterator method on the implementation like we did for 
+No longer do we add an iterator method on the implementation like we did for
 `Iter` and `ValuesMut`, instead, we implement `IntoIterator`
 for the Binary Search Tree, allowing the tree to be turned into an iterator
 directly like this:
@@ -587,7 +580,6 @@ can only produce a single traversal method for iteration – to put it plainly,
 there is no way of enforcing a specific traversal order unless explicitly
 called with one and that would defeat the purpose.
 
-
 ```Rust
 impl<K: Ord, V: PartialEq> IntoIterator for BST<K, V> {
     type Item = (K, V);
@@ -599,17 +591,16 @@ impl<K: Ord, V: PartialEq> IntoIterator for BST<K, V> {
 }
 ```
 
-This moves the root of the binary search tree into the `into_iter` method 
-when the root node of the tree is added to the `stack`, the tree instance 
-will then be dropped. Another notable difference here is that we have 
-another associated type: `IntoIter`, which is a requirement of the 
-`IntoIterator` trait, that tells the implementation what iterator we're 
+This moves the root of the binary search tree into the `into_iter` method
+when the root node of the tree is added to the `stack`, the tree instance
+will then be dropped. Another notable difference here is that we have
+another associated type: `IntoIter`, which is a requirement of the
+`IntoIterator` trait, that tells the implementation what iterator we're
 turning this into (in our case; a stack).
 
-We still actually need to iterate through the elements of our iterator. So 
-that means implementing the `Iterator` trait like we did when we 
+We still actually need to iterate through the elements of our iterator. So
+that means implementing the `Iterator` trait like we did when we
 implemented Iter and ValuesMut.
-
 
 ```Rust
 impl<K: Ord, V: PartialEq> Iterator for IntoIter<K, V> {
@@ -620,7 +611,7 @@ impl<K: Ord, V: PartialEq> Iterator for IntoIter<K, V> {
             let current = current.unwrap();
             if current.right.is_some() {
                 self.stack.push(current.right)
-            } 
+            }
 
             if current.left.is_some() {
                 self.stack.push(current.left)
@@ -633,15 +624,14 @@ impl<K: Ord, V: PartialEq> Iterator for IntoIter<K, V> {
 }
 ```
 
-For this `next` method, we can reuse the logic from PreOrderIter's `next` 
+For this `next` method, we can reuse the logic from PreOrderIter's `next`
 method; except we change from moving references to values.
-
 
 ## Conclusion
 
-The approach we followed in this article is considered more "textbook" as it 
-follows the pointer method commonly used to implement trees in other 
-languages and is therefore more intuitive. This means that for someone with 
+The approach we followed in this article is considered more "textbook" as it
+follows the pointer method commonly used to implement trees in other
+languages and is therefore more intuitive. This means that for someone with
 less experience in writing Rust it is easier to implement.
 
 There are, however, some disadvantages with this approach, both in performance
@@ -649,13 +639,13 @@ and style.
 
 According to the official Rust docs under [BTreeMap](https://doc.Rust-lang.org/std/collections/struct.BTreeMap.html), our implementation of a tree is
 wildly inefficient. Each node added to the tree triggers a heap allocation
-and because we do not allocate a large contiguous block such as with 
+and because we do not allocate a large contiguous block such as with
 a fixed-size structure, the memory is all fragmented so there is no way
-for the CPU caches to utilize the data structure, Figure 1 illustrates this: 
+for the CPU caches to utilize the data structure, Figure 1 illustrates this:
 
 ![Figure 1: Fragmented vs. Contiguous Memory](/img/fragmented-mem.svg)
 
-The general consensus amongst other members of the Rust community is to 
+The general consensus amongst other members of the Rust community is to
 use arena allocators. Both [Nick Cameron's article](https://github.com/nrc/r4cppp/blob/master/graphs/README.md) and [Niko Matsakis's article](https://smallcultfollowing.com/babysteps/blog/2015/04/06/modeling-graphs-in-Rust-using-vector-indices/)
 discuss the use of arena allocators as ways to model graphs in Rust, but
 the same ideas can also be used for trees.
@@ -667,24 +657,24 @@ be able to look up a textbook definition and quickly map that
 to an implementation in Rust, for others newer to the language it can take
 time and prove fairly difficult.
 
-Most of the problems one has when trying to implement data structures in Rust 
-usually come down to ownership and borrowing, a concept alien to users of 
+Most of the problems one has when trying to implement data structures in Rust
+usually come down to ownership and borrowing, a concept alien to users of
 other mainstream languages. I hope that you have learnt something from this
-blog post and that it has given you some inspiration. Thanks for reading, Ed.  
+blog post and that it has given you some inspiration. Thanks for reading, Ed.
 
 ## Further Reading
 
-A more in-depth look at Rust iterators in general and implementing them for 
+A more in-depth look at Rust iterators in general and implementing them for
 your types:
 [std::iter::Iterator](https://doc.Rust-lang.org/std/iter/trait.Iterator.html).
 
 For a more practical follow-along and an excellent Rust resource: [Learning Rust With Entirely Too Many Linked Lists](https://Rust-unofficial.github.io/too-many-lists).
 
-For more details on converting your collections into an iterator: 
+For more details on converting your collections into an iterator:
 [std::iter::IntoIterator](https://doc.Rust-lang.org/std/iter/trait.IntoIterator.html#associatedtype.IntoIter).
 
-For learning more about the iterator pattern in general, common to many 
+For learning more about the iterator pattern in general, common to many
 languages:
 [Iterator pattern](https://en.wikipedia.org/wiki/Iterator_pattern).
 
-Finally, if you want to learn more about [Trees](https://en.wikipedia.org/wiki/Tree_(data_structure)).
+Finally, if you want to learn more about [Trees](<https://en.wikipedia.org/wiki/Tree_(data_structure)>).

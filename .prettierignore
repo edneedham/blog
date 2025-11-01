@@ -1,0 +1,14 @@
+/eslint.config.mjs
+/next-env.d.ts
+/next.config.ts
+/package-lock.json
+/.gitignore
+/package.json
+/pnpm-lock.yaml
+/postcss.config.mjs
+/tsconfig.json
+/.next
+/.vercel
+/node_modules
+/public
+/README.md

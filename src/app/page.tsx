@@ -1,15 +1,15 @@
-import { getAllPosts } from '@/app/lib/mdx';
-import SectionCard from './components/SectionCard';
-import Header from './components/Header';
+import { getAllPosts } from '@/app/lib/mdx'
+import SectionCard from './components/SectionCard'
+import Header from './components/Header'
 
 export default function Home() {
-  const allPosts = getAllPosts();
-  
+  const allPosts = getAllPosts()
+
   // Get the latest post (first in sorted array)
-  const latestPost = allPosts[0];
-  
-  const generalPosts = allPosts.filter(post => post.category === 'general');
-  const devDiaries = allPosts.filter(post => post.category === 'dev-diary');
+  const latestPost = allPosts[0]
+
+  const generalPosts = allPosts.filter((post) => post.category === 'general')
+  const devDiaries = allPosts.filter((post) => post.category === 'dev-diary')
 
   // Define sections
   const sections = [
@@ -20,22 +20,22 @@ export default function Home() {
     {
       key: 'dev-diary',
       title: 'Dev Diary',
-      description: "Engineering problems we've faced while developing En Punto and how we solved them.",
+      description:
+        "Engineering problems we've faced while developing En Punto and how we solved them.",
       posts: devDiaries,
       logo: '/enpunto.webp',
     },
-  ];
+  ]
 
   // Sort sections: put the latest post's category first
-  const sortedSections = latestPost?.category === 'dev-diary' 
-    ? [...sections].reverse() 
-    : sections;
+  const sortedSections =
+    latestPost?.category === 'dev-diary' ? [...sections].reverse() : sections
 
   return (
     <div>
       <Header />
       {sortedSections.map((section) => (
-        <SectionCard 
+        <SectionCard
           key={section.key}
           title={section.title}
           description={section.description}
@@ -44,5 +44,5 @@ export default function Home() {
         />
       ))}
     </div>
-  );
+  )
 }
