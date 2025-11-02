@@ -13,11 +13,6 @@ export default function Header() {
         </Link>
       </div>
       <div className="flex items-center justify-end">
-        <Link href="/about">
-          <h2 className="text-l font-medium hover:bg-gray-300 p-1 rounded-xs transition-colors mr-4">
-            About
-          </h2>
-        </Link>
         <Link
           href="https://x.com/needhame"
           target="_blank"

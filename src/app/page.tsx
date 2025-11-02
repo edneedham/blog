@@ -11,7 +11,6 @@ export default function Home() {
   const generalPosts = allPosts.filter((post) => post.category === 'general')
   const devDiaries = allPosts.filter((post) => post.category === 'dev-diary')
 
-  // Define sections
   const sections = [
     {
       key: 'general',
@@ -27,7 +26,6 @@ export default function Home() {
     },
   ]
 
-  // Sort sections: put the latest post's category first
   const sortedSections =
     latestPost?.category === 'dev-diary' ? [...sections].reverse() : sections
 

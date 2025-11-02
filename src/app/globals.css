@@ -44,7 +44,6 @@ body {
     sans-serif;
 }
 
-/* Character-based line length control */
 .content-width {
   max-width: clamp(45ch, 90vw, 65ch);
   margin-left: auto;
