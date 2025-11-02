@@ -1,0 +1,70 @@
+---
+date: "2025-10-26"
+title: "Solving End-to-End Testing Issues at En Punto"
+tags: ["Testing", "End-to-End Testing", "En Punto"]
+category: "dev-diary"
+---
+
+## Introduction
+
+We've been making good progress over at En Punto and I wanted to share a particular problem we had during 
+development and what ended up being our solution. 
+
+Our end-to-end tests kept failing because some requests were 
+being intercepted by Playwright, while others slipped through due to Next.js’s BFF architecture.
+
+## The Problem
+
+For anyone having similar issues, I hope this can be of some use so I am providing the context here first.
+
+### The Stack
+
+* Backend: Go API.
+* Frontend: Next.js frontend with a Backend for Frontend (BFF) architecture.
+* Database: PostgreSQL.
+
+For frontend unit tests, we use Vitest and React Testing Library and then Mock Service Worker (MSW) to 
+mock the API for integration tests. For backend unit tests we use the standard Go testing package and a 
+generated mock store with Mockery and testcontainers for integrations. For End-to-End (E2E) tests we use Playwright.
+
+
+## What We Tried (and Why It Failed)
+
+Playwright's `page.route()` intercepts browser requests and allows you to mock responses. 
+In our setup, client-side requests go through Next.js API routes (acting as a BFF proxy), while server actions 
+call the Go API directly from the Node environment. That’s why Playwright could intercept some requests but not others.
+
+To get around this we decided to use the same approach we had used for integration tests, MSW.
+We could then mock the response for requests that Playwright couldn't intercept, such as server actions.
+Playwright can run MSW through the `webServer` object in its config. On paper, this should have worked; but in practice, 
+we hit some limitations. For those unfamiliar, MSW uses the service worker API to intercept
+fetch requests before they hit the network much like Playwright, albeit in a different way. And in the same way,
+the requests to the Go API from the proxy are not intercepted by MSW. Both MSW and Playwright are bound by the browser.
+
+It might be possible but we couldn't find a reliable way.
+
+## Our Final Solution
+
+As it turns out, the answer was staring us in the face all along. We already use Docker Compose to orchestrate all of the
+services in the application, we just needed to change who the end consumer was: the browser. Instead of mocking the
+API with MSW, we decided to run Docker Compose with test-specific environment variables, giving us a dedicated test 
+environment yet a mirror of production. This gave us several benefits. Playwright just becomes another end user (what we 
+always wanted it to be). We could reuse the same Docker Compose file used in production, and best of all, use the exact 
+same API. This means no mocks to maintain or keep in sync. Ultimately, this gives us high confidence that a passing test 
+equates to a working feature for a real user.
+
+## Tradeoffs and Lessons Learned
+
+This has by no means been a silver bullet. The tests take longer because we are actually sending requests 
+to the API over the network. The test runner uses up more memory and CPU resources which increases costs. Keeping tests 
+isolated and repeatable, however, requires a solid seeding process to ensure database consistency. To balance these 
+tradeoffs, we only run tests that are relevant to the code we change, removing the need to run the entire E2E test suite 
+every time we run the CI process. And we adapted our seeding API that we use for production and staging environments to 
+also be used in the tests, keeping the test data consistent.
+
+* Mocking in E2E tests can be difficult with a BFF architecture.
+* Real services are probably better anyway, albeit slower.
+* Seeding is essential for repeatability.
+
+It's not perfect but our E2E tests are reliable and that's a tradeoff we can live with.
+

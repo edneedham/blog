@@ -20,7 +20,6 @@
 # production
 /build
 
-/src/app/posts/end-to-end-testing.mdx
 # misc
 .DS_Store
 *.pem
