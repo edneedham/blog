@@ -48,7 +48,7 @@ It might be possible but we couldn't find a reliable way.
 As it turns out, the answer was staring us in the face all along. We already use Docker Compose to orchestrate all of the
 services in the application, we just needed to change who the end consumer was: the browser. Instead of mocking the
 API with MSW, we decided to run Docker Compose with test-specific environment variables, giving us a dedicated test 
-environment yet a mirror of production. This gave us several benefits. Playwright just becomes another end user (what we 
+environment (a mirror of production). This gave us several benefits. Playwright just becomes another end user (what we 
 always wanted it to be). We could reuse the same Docker Compose file used in production, and best of all, use the exact 
 same API. This means no mocks to maintain or keep in sync. Ultimately, this gives us high confidence that a passing test 
 equates to a working feature for a real user.
