@@ -61,8 +61,5 @@ tradeoffs, we only run tests that are relevant to the code we change, removing t
 every time we run the CI process. And we adapted our seeding API that we use for production and staging environments to
 also be used in the tests, keeping the test data consistent.
 
-- Mocking in E2E tests can be difficult with a BFF architecture.
-- Real services are probably better anyway, albeit slower.
-- Seeding is essential for repeatability.
-
-It's not perfect but our E2E tests are reliable and that's a tradeoff we can live with.
+While this approach has solved the issues regarding tool use, we can already see the infrastructure problems that lie 
+ahead... 
