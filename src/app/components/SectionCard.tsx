@@ -18,10 +18,12 @@ export default function SectionCard({
 }: SectionCardProps) {
   return (
     <section className="mb-12 pb-3 border-b border-gray-300">
-      {title && logo && (
+      {title && (
         <div className="flex items-center mb-0.5">
           <h3 className="text-l font-medium pr-2 text-gray-500">{title}</h3>
-          <Image src={logo} width="16" height="16" alt="en punto logo" />
+          {logo && (
+            <Image src={logo} width="16" height="16" alt="en punto logo" />
+          )}
         </div>
       )}
       {description && (
@@ -30,7 +32,7 @@ export default function SectionCard({
       {posts.length === 0 ? (
         <p className="text-gray-500">No posts yet.</p>
       ) : (
-        <div className="space-y-12">
+        <div className="space-y-4">
           {posts.map((post) => (
             <article key={post.slug}>
               <Link href={`/posts/${post.slug}`} className="group block">
