@@ -14,6 +14,9 @@ export default function Home() {
   const sections = [
     {
       key: 'general',
+      title: 'Posts About Anything',
+      description: 
+        "Posts on anything I find interesting",
       posts: generalPosts,
     },
     {
