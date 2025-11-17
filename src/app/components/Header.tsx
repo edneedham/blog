@@ -1,8 +1,26 @@
+'use client'
+
 import React from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import AdaptiveLogo from './AdaptiveLogo'
 
-export default function Header() {
+interface HeaderProps {
+  selectedLanguage?: string
+}
+
+export default function Header({ selectedLanguage }: HeaderProps) {
+  const pathname = usePathname()
+
+  const currentLanguage =
+    selectedLanguage || (pathname.startsWith('/es') ? 'es' : 'en')
+
+  const getLanguageLink = (lang: string) => {
+      const params = new URLSearchParams()
+      params.set('lang', lang)
+      return `/?${params.toString()}`
+  }
+
   return (
     <div className="flex items-center justify-between mb-12">
       <div>
@@ -12,7 +30,26 @@ export default function Header() {
           </h1>
         </Link>
       </div>
-      <div className="flex items-center justify-end">
+      <div className="flex items-center justify-end gap-4">
+        <div className="flex items-center space-x-1 p-1">
+          <Link
+            href={getLanguageLink('en')}
+            className={`px-3 py-1 text-sm transition-colors ${
+              currentLanguage === 'en' ? 'bg-gray-300' : 'hover:text-gray-700'
+            }`}
+          >
+            English
+          </Link>
+          <Link
+            href={getLanguageLink('es')}
+            className={`px-3 py-1 text-sm transition-colors ${
+              currentLanguage === 'es' ? 'bg-gray-300' : 'hover:text-gray-700'
+            }`}
+          >
+            Español
+          </Link>
+        </div>
+
         <Link
           href="https://x.com/needhame"
           target="_blank"

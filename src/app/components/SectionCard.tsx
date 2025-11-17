@@ -7,6 +7,7 @@ interface SectionCardProps {
   title?: string
   description?: string
   posts: PostMetadata[]
+  locale: string
   logo?: string
 }
 
@@ -14,6 +15,7 @@ export default function SectionCard({
   title,
   description,
   posts,
+  locale,
   logo,
 }: SectionCardProps) {
   return (
@@ -30,12 +32,14 @@ export default function SectionCard({
         <p className="text-gray-400 mb-2 text-sm">{description}</p>
       )}
       {posts.length === 0 ? (
-        <p className="text-gray-500">No posts yet.</p>
+        <p className="text-gray-500">{locale === 'es' ? 'No hay posts' : 'No posts yet'}</p>
       ) : (
         <div className="space-y-4">
           {posts.map((post) => (
-            <article key={post.slug}>
-              <Link href={`/posts/${post.slug}`} className="group block">
+            <article key={`${post.locale}-${post.slug}`}>
+              <Link 
+                href={post.locale === 'es' ? `/es/posts/${post.slug}` : `/posts/${post.slug}`} 
+                className="group block">
                 <h3 className="text-xl font-medium group-hover:bg-gray-300 transition-colors">
                   {post.title}
                 </h3>
