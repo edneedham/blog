@@ -1,0 +1,78 @@
+---
+date: '2025-12-30'
+title: 'Resolviendo problemas en pruebas end-to-end'
+tags: ['Testing', 'End-to-End Testing', 'En Punto']
+category: 'dev-diary'
+language: 'es'
+---
+
+## Introducción
+
+Hemos estado avanzando muy bien en En Punto y quería compartir un problema puntual que tuvimos durante el
+desarrollo, junto con la solución a la que llegamos.
+
+Nuestros tests end-to-end (E2E) seguían fallando porque algunas requests eran interceptadas por Playwright,
+mientras que otras se colaban debido a la arquitectura BFF de Next.js.
+
+## El problema
+
+Espero que este artículo sea útil para alguien que tenga problemas similares, así que a continuación doy
+un poco de contexto:
+
+### El stack
+
+- **Backend:** API en Go.  
+- **Frontend:** Next.js con una arquitectura Backend for Frontend (BFF).  
+- **Base de datos:** PostgreSQL.
+
+Para los tests unitarios del frontend usamos **Vitest** y **React Testing Library**, y luego **Mock Service Worker (MSW)**
+para mockear la API en los tests de integración.  
+Para los tests unitarios del backend usamos el paquete estándar de testing de Go, junto con un *mock store*
+generado con **Mockery**, y **testcontainers** para las integraciones.  
+Para los tests end-to-end (E2E) usamos **Playwright**.
+
+## Lo que probamos (y por qué no funcionó)
+
+El método `page.route()` de Playwright intercepta requests del navegador y permite mockear respuestas.
+En nuestra configuración, las requests del lado del cliente pasan por las rutas de API de Next.js
+(que actúan como proxy BFF), mientras que las *server actions* llaman a la API en Go directamente
+desde el entorno de Node. Por eso Playwright podía interceptar algunas requests, pero no otras.
+
+Para esquivar esto, decidimos usar el mismo enfoque que ya veníamos usando en los tests de integración: **MSW**.
+La idea era poder mockear las respuestas de las requests que Playwright no podía interceptar, como las *server actions*.
+Playwright permite ejecutar MSW a través del objeto `webServer` en su configuración. En los papeles, esto debería haber
+funcionado; pero en la práctica nos encontramos con algunas limitaciones.
+
+Para quienes no lo conocen, MSW usa la API de *service workers* para interceptar requests `fetch` antes de que salgan a la red,
+de forma similar a Playwright, aunque con un mecanismo distinto. Y, de la misma manera, las requests hacia la API en Go
+que salen desde el proxy no son interceptadas por MSW. Tanto MSW como Playwright están limitados por el navegador.
+
+Puede que sea posible, pero no encontramos una forma confiable de hacerlo funcionar.
+
+## Nuestra solución final
+
+Resultó que la respuesta estuvo frente a nosotros todo el tiempo. Ya usábamos **Docker Compose** para orquestar todos los
+servicios de la aplicación; lo único que necesitábamos cambiar era quién era el consumidor final: el navegador.
+En lugar de mockear la API con MSW, decidimos levantar Docker Compose con variables de entorno específicas para testing,
+lo que nos dio un entorno de pruebas dedicado (un espejo de producción).
+
+Esto nos aportó varios beneficios. **Playwright pasa a ser simplemente otro usuario final**
+(que es lo que siempre quisimos que fuera). Pudimos reutilizar el mismo archivo de Docker Compose que usamos en producción
+y, lo mejor de todo, usar exactamente la misma API. Esto significa que no hay mocks que mantener ni sincronizar.
+
+En última instancia, esto nos da un alto nivel de confianza de que un test que pasa equivale a una funcionalidad
+que realmente funciona para un usuario real.
+
+## Tradeoffs y lecciones aprendidas
+
+Esto no es una bala de plata. Los tests tardan más porque estamos enviando requests reales a la API a través de la red.
+El *test runner* consume más memoria y CPU, lo que incrementa los costos. Mantener los tests aislados y repetibles,
+por otro lado, requiere un proceso sólido de *seeding* para garantizar la consistencia de la base de datos.
+
+Para equilibrar estos tradeoffs, solo corremos los tests que son relevantes para el código que modificamos,
+evitando así tener que ejecutar toda la suite de tests E2E cada vez que corre el proceso de CI.
+Además, adaptamos la API de *seeding* que usamos en producción y en *staging* para que también pueda usarse en los tests,
+manteniendo los datos de prueba consistentes.
+
+Si bien este enfoque resolvió los problemas relacionados con el uso de herramientas,
+ya podemos ver los desafíos de infraestructura que se vienen…
