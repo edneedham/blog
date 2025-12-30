@@ -7,7 +7,7 @@ export default async function EnglishPostPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  return <PostPage slug={slug} locale="en" />
+  return <PostPage slug={slug} />
 }
 
 export async function generateMetadata({
@@ -16,7 +16,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const post = await getPostBySlug(slug, 'en')
+  const post = await getPostBySlug(slug)
 
   if (!post) {
     return {}

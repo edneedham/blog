@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import { getPostBySlug } from '@/app/lib/mdx'
+import CICDWorkflow, { OldCICDWorkflow } from '@/app/components/CI-CD'
 import { MDXRemote } from 'next-mdx-remote/rsc'
 import Header from './Header'
 import Image from 'next/image'
@@ -40,6 +41,8 @@ const components = {
       {...props}
     />
   ),
+  CICDWorkflow,
+  OldCICDWorkflow,
 }
 
 interface PostPageProps {
@@ -59,9 +62,13 @@ export default async function PostPage({ slug, locale }: PostPageProps) {
       <Header />
       {post.category === 'dev-diary' && (
         <div className="flex items-center mb-2">
-            {locale === 'es' 
-            ? <h3 className="text-l font-medium pr-2 text-gray-500">Diario de Desarrollo</h3>
-            : <h3 className="text-l font-medium pr-2 text-gray-500">Dev Diary</h3>}
+          {locale === 'es' ? (
+            <h3 className="text-l font-medium pr-2 text-gray-500">
+              Diario de Desarrollo
+            </h3>
+          ) : (
+            <h3 className="text-l font-medium pr-2 text-gray-500">Dev Diary</h3>
+          )}
           <Image
             src="/enpunto.webp"
             width="16"

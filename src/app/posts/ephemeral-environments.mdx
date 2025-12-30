@@ -1,61 +1,80 @@
 ---
 date: '2025-11-05'
-title: 'Ephemeral Environments'
+title: 'Why We Switched to Ephemeral Previews'
 tags: ['Testing', 'Infrastructure', 'En Punto']
 category: 'dev-diary'
 language: 'en'
 ---
 
-The last blog post was left on a bit of cliffhanger because even though we had solved the issues with 
-the tools (Playwright, Mock Service Worker) we could already start to see problems with scale and 
-the current testing infrastructure. Well, this post aims to address that.
+The last blog post was left on a bit of a cliffhanger: even though we had solved the tooling issues
+(Playwright, Mock Service Worker), we could already see problems with scale and our testing
+infrastructure.
 
-If you want to read the previous post in this series, [click me](/posts/end-to-end-testing).
+If you want to read the previous post in this series, [click here](/posts/end-to-end-testing).
 
-As a reminder, we made the tradeoff to dockerise the end to end testing infrastructure so that the 
-testing environment behaves somewhat like a mirror to production, allowing end to end tests to act as if 
-they were a real user. And to avoid the issues we had with getting playwright to intercept server to 
-server communication from Node.js to the Go api. But there are issues with our approach, it was a tradeoff
-after all. 
+## TL;DR
 
-Every time we create a new Pull Request we trigger unit and integration tests. Fine. We also can trigger
-end to end tests to run if we want. Also fine. The app deploys and it can be manually tested too. 
+We moved **manual testing before merge** by spinning up a per-PR preview environment (app + database branch),
+instead of queueing everything behind a long-lived staging environment. It removes the deployment bottleneck,
+but it comes with new maintenance (especially around seed data).
 
-In our current solution, manual testing is coming last in our workflow, after the code has been 
-merged. 
+## What broke at scale
 
-This creates several problems, firstly tests don't necessarily capture the intended behaviour, only what 
-the person writing those tests thinks the behaviour should be, at best. Secondly, we have to wait for 
-the tests to run and pass before it is deployed and merging is a pre-requisite for deployment.
-Then we have to wait for manual testing, which could fail. In this time, development stops.
+As a reminder, we made the tradeoff to dockerise the end-to-end (E2E) testing infrastructure so the
+environment behaves like a mirror of production, allowing E2E tests to run as if they were a real user.
+There were issues with our approach; it was a tradeoff after all.
 
-So we have two issues, the workflow order and having a long-lasting staging environment. If all deployments
-go to the same place then there is going to be a queue, right?
+Previously, every time we created a new PR we triggered unit and integration tests. We could also trigger
+E2E tests if we wanted. The app would deploy and it could be manually tested too.
 
-Ephemeral environments have been our solution for this problem, and it actually solves both issues. I think
-it is unreasonable for code that fails automated tests to be pushed to a long-standing environment just so
-it can be manually tested, so automated tests should still come before manual. We don't want to merge failing
-code. However, if it passes automated testing but fails manual testing it still fails.
-But it is faster (on average) to fix a failing automated test than a manual one because it requires no 
-communication between people. 
+In that solution, manual testing came last in our workflow, after the code had already been merged.
 
-Anyway, by adopting ephemeral environments we have been able to change the order of the workflow, we now deploy
-first, not last. But what if the automated tests fail? Well, we still do unit and integration tests, just
-we don't run end to end tests until the Pull Request receives the ready-to-deploy label (manual testing passes).
+This creates several problems. First, tests don’t necessarily capture the intended behaviour—only what
+the person writing them _thinks_ the behaviour should be. Second, we had to wait for tests to run and pass
+before deploying, and in our flow merging was a prerequisite for deployment. Then we had to wait for manual
+testing, which could fail. During that time, development waits.
 
-Doesn't this seem counter to what I said before? We don't actually merge until everything passes, before 
-we merged in order to deploy, potentially failing manual tests. Now we deploy with an environment that is
-created just for the changes in the Pull Request. With this we don't dirty any long-lasting branches and 
-then need to rollback, we just create an environment from the workflow that is then destroyed once the 
-PR receives the ready-to-merge label.
+So we had two issues: workflow order and a long-lived staging environment. If all deployments go to the same
+place, there’s going to be a queue.
 
-The frontend is deployed on Vercel which automatically creates independent previews on every deploy. Thanks,
-Vercel. The api is deployed on fly.io so we create a new app for each new PR within the workflow. While the
+## The change: ephemeral previews
+
+Ephemeral environments have been our solution, and it solves both issues:
+
+_You can switch between the two workflows to see what has changed._
+
+<CICDWorkflow />
+
+Here’s the gist:
+
+- **Before**: PR → tests → merge → deploy → manual testing (too late) → fix forward
+- **After**: PR → tests → deploy preview → manual testing (before merge) → merge → cleanup
+
+We now deploy earlier (Step 2 in the diagram), not last. We still run unit and integration tests, we just have
+a deployment that we can manually test **before** we merge the code. We remove the long-lived staging
+environment. Code is then merged into _main_ if everything works as the preview infrastructure is the same shape
+as production.
+
+The frontend is deployed on Vercel which automatically creates independent previews on every deploy.
+The api is deployed on Fly.io so we create a new app for each new PR within the workflow. While the
 workflow also integrates with a Neon github app to create a new database branch on every PR.
 
-Because every change is now a new deployment code can continue to be developed rather than waiting for end
-to end or manual tests to pass. 
+When a PR is merged into production, we have a cleanup workflow that removes the preview environments
+from Fly.io and deletes the preview database branch on Neon.
 
-We have also had to adapt our seeder because we don't want to be running our full seeder every time we 
+That means a PR results in a preview frontend, a preview API app, and a dedicated preview database
+branch, so changes can be validated in isolation. The preview sticks around until the PR is merged (or closed),
+at which point it’s torn down.
+
+Because every change now has its own deployment, code can continue to be developed rather than waiting for E2E
+or manual tests to pass behind a staging queue.
+
+We have also had to adapt our seeder because we don't want to be running our full seeder every time we
 create a new PR to populate the preview database branch. Instead, we run a very small seeder, just enough
-for the manual tests.
+for the manual tests relative to the code changes. This is also a benefit because we decrease the compute
+and storage needed in Neon, reducing costs.
+
+Is this new workflow perfect? No. Seed data is now part of the cost: we need to keep the lightweight seeder
+aligned with what we expect to see in the app for each change. In return we’ve removed the deployment
+bottleneck, every PR gets its own preview, so we can validate behaviour before merging to production. Software
+engineering is a game of tradeoffs.
