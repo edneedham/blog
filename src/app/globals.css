@@ -78,3 +78,16 @@ body {
   margin-left: auto;
   margin-right: auto;
 }
+
+/* Utility classes for semantic text colors */
+.text-foreground-muted {
+  color: var(--foreground-muted);
+}
+
+.text-foreground-subtle {
+  color: var(--foreground-subtle);
+}
+
+.border-border {
+  border-color: var(--border);
+}

@@ -28,7 +28,7 @@ export default async function Home({ searchParams }: HomeProps) {
     (post) => post.category === 'general' && post.locale === selectedLanguage
   )
   const devDiaries = allPosts.filter(
-    (post) => post.category === 'dev-diary' && post.locale === selectedLanguage
+    (post) => post.category === 'en-punto' && post.locale === selectedLanguage
   )
 
   const sections = [
@@ -42,8 +42,8 @@ export default async function Home({ searchParams }: HomeProps) {
       posts: generalPosts,
     },
     {
-      key: 'dev-diary',
-      title: selectedLanguage === 'es' ? 'Diario de Desarrollo' : 'Dev Diary',
+      key: 'en-punto',
+      title: 'En Punto',
       description:
         selectedLanguage === 'es'
           ? 'Problemas de ingeniería que hemos enfrentado al desarrollar En Punto y cómo los resolvimos.'
@@ -55,7 +55,7 @@ export default async function Home({ searchParams }: HomeProps) {
   ]
 
   const sortedSections =
-    latestPost?.category === 'dev-diary' ? [...sections].reverse() : sections
+    latestPost?.category === 'en-punto' ? [...sections].reverse() : sections
 
   return (
     <div>

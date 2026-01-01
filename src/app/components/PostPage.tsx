@@ -61,15 +61,15 @@ export default async function PostPage({ slug, locale }: PostPageProps) {
   return (
     <article className="max-w-2xl mx-auto">
       <Header />
-      {post.category === 'dev-diary' && (
+      {post.category === 'en-punto' && (
         <div className="flex items-center mb-2">
           {locale === 'es' ? (
             <h3 className="text-l font-medium pr-2 text-foreground-subtle">
-              Diario de Desarrollo
+              En Punto
             </h3>
           ) : (
             <h3 className="text-l font-medium pr-2 text-foreground-subtle">
-              Dev Diary
+              En Punto
             </h3>
           )}
           <Image

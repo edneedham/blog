@@ -51,16 +51,26 @@ export default function AdaptiveLogo({
     )
   }
 
-  // After mounting, use resolved theme for accurate switching
-  const src = resolvedTheme === 'dark' ? darkSrc : lightSrc
+  // After mounting, show both images but control visibility via CSS
+  // This ensures smooth transitions when theme changes
+  const isDark = resolvedTheme === 'dark'
 
   return (
-    <Image
-      src={src}
-      width={width}
-      height={height}
-      alt={alt}
-      className={className}
-    />
+    <>
+      <Image
+        src={lightSrc}
+        width={width}
+        height={height}
+        alt={alt}
+        className={`${isDark ? 'hidden' : 'block'} ${className}`}
+      />
+      <Image
+        src={darkSrc}
+        width={width}
+        height={height}
+        alt={alt}
+        className={`${isDark ? 'block' : 'hidden'} ${className}`}
+      />
+    </>
   )
 }
