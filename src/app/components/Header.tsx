@@ -1,9 +1,9 @@
 'use client'
 
-import React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import AdaptiveLogo from './AdaptiveLogo'
+import ThemeToggle from './ThemeToggle'
 
 interface HeaderProps {
   selectedLanguage?: string
@@ -16,37 +16,42 @@ export default function Header({ selectedLanguage }: HeaderProps) {
     selectedLanguage || (pathname.startsWith('/es') ? 'es' : 'en')
 
   const getLanguageLink = (lang: string) => {
-      const params = new URLSearchParams()
-      params.set('lang', lang)
-      return `/?${params.toString()}`
+    const params = new URLSearchParams()
+    params.set('lang', lang)
+    return `/?${params.toString()}`
   }
 
   return (
     <div className="flex items-center justify-between mb-12">
       <div>
         <Link href="/">
-          <h1 className="text-xl font-medium hover:bg-gray-300 rounded-xs transition-colors">
+          <h1 className="text-xl font-medium hover:opacity-60 transition-opacity">
             Edward Needham
           </h1>
         </Link>
       </div>
       <div className="flex items-center justify-end gap-4">
+        <ThemeToggle />
         <div className="flex items-center space-x-1 p-1">
           <Link
             href={getLanguageLink('en')}
-            className={`px-3 py-1 text-sm transition-colors ${
-              currentLanguage === 'en' ? 'bg-gray-300' : 'hover:text-gray-700'
+            className={`px-2 py-1 text-sm transition-colors ${
+              currentLanguage === 'en'
+                ? 'font-semibold underline underline-offset-4'
+                : 'opacity-60 hover:opacity-100'
             }`}
           >
-            English
+            EN
           </Link>
           <Link
             href={getLanguageLink('es')}
-            className={`px-3 py-1 text-sm transition-colors ${
-              currentLanguage === 'es' ? 'bg-gray-300' : 'hover:text-gray-700'
+            className={`px-2 py-1 text-sm transition-colors ${
+              currentLanguage === 'es'
+                ? 'font-semibold underline underline-offset-4'
+                : 'opacity-60 hover:opacity-100'
             }`}
           >
-            Español
+            ES
           </Link>
         </div>
 
@@ -54,7 +59,7 @@ export default function Header({ selectedLanguage }: HeaderProps) {
           href="https://x.com/needhame"
           target="_blank"
           rel="noopener noreferrer"
-          className="hover:bg-gray-300 transition-colors p-1"
+          className="hover:opacity-60 transition-opacity p-1"
         >
           <AdaptiveLogo
             lightSrc="/x-logo-black.png"
@@ -68,7 +73,7 @@ export default function Header({ selectedLanguage }: HeaderProps) {
           href="https://linkedin.com/in/edward-needham/"
           target="_blank"
           rel="noopener noreferrer"
-          className="hover:bg-gray-300 transition-colors p-1"
+          className="hover:opacity-60 transition-opacity p-1"
         >
           <AdaptiveLogo
             lightSrc="/InBug-Black.png"
