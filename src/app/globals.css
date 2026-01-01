@@ -3,33 +3,62 @@
 :root {
   --background: #ffffff;
   --foreground: #000000;
+  --foreground-muted: #525252;
+  --foreground-subtle: #737373;
+  --border: #e5e5e5;
+}
+
+[data-theme='dark'] {
+  --background: #000000;
+  --foreground: #ffffff;
+  --foreground-muted: #d4d4d4;
+  --foreground-subtle: #a3a3a3;
+  --border: #404040;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-foreground-subtle: var(--foreground-subtle);
+  --color-border: var(--border);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-.light-mode-hidden {
+/* Light mode: hide dark logos, show light logos */
+:root .light-mode-hidden {
   display: none;
 }
 
-.dark-mode-hidden {
+:root .dark-mode-hidden {
   display: block;
 }
 
+/* Dark mode: show dark logos, hide light logos */
+[data-theme='dark'] .light-mode-hidden {
+  display: block;
+}
+
+[data-theme='dark'] .dark-mode-hidden {
+  display: none;
+}
+
+/* System preference fallback for auto mode */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     --background: #000000;
     --foreground: #ffffff;
+    --foreground-muted: #d4d4d4;
+    --foreground-subtle: #a3a3a3;
+    --border: #404040;
   }
-  .light-mode-hidden {
+
+  :root:not([data-theme='light']) .light-mode-hidden {
     display: block;
   }
 
-  .dark-mode-hidden {
+  :root:not([data-theme='light']) .dark-mode-hidden {
     display: none;
   }
 }

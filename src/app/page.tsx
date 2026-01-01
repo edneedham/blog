@@ -36,12 +36,8 @@ export default async function Home({ searchParams }: HomeProps) {
       key: 'general',
       title:
         selectedLanguage === 'es'
-          ? 'Posts Sobre Cualquier Cosa'
-          : 'Posts About Anything',
-      description:
-        selectedLanguage === 'es'
-          ? 'Posts sobre cualquier cosa que encuentre interesante'
-          : 'Posts on anything I find interesting',
+          ? 'General'
+          : 'General',
       locale: selectedLanguage,
       posts: generalPosts,
     },
