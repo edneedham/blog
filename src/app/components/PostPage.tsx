@@ -37,20 +37,17 @@ const components = {
   code: (props: any) => (
     <code
       className="bg-foreground/10 px-1.5 py-0.5 rounded text-sm"
-      className="bg-foreground/10 px-1.5 py-0.5 rounded text-sm"
       {...props}
     />
   ),
   pre: (props: any) => (
     <pre
       className="bg-foreground/10 p-4 rounded-lg overflow-x-auto mb-4"
-      className="bg-foreground/10 p-4 rounded-lg overflow-x-auto mb-4"
       {...props}
     />
   ),
   blockquote: (props: any) => (
     <blockquote
-      className="border-l-4 border-border pl-4 italic my-4"
       className="border-l-4 border-border pl-4 italic my-4"
       {...props}
     />
@@ -94,7 +91,6 @@ export default async function PostPage({ slug, locale }: PostPageProps) {
         </div>
       )}
       <h1 className="text-3xl font-medium mb-3">{post.title}</h1>
-      <div className="text-foreground-subtle text-sm">
       <div className="text-foreground-subtle text-sm">
         <time>{post.date}</time>
       </div>
