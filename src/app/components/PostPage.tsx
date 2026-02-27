@@ -23,9 +23,20 @@ const components = {
   ol: (props: any) => (
     <ol className="mb-4 ml-6 list-decimal text-foreground-muted" {...props} />
   ),
+  p: (props: any) => (
+    <p className="mb-4 leading-7 text-foreground-muted" {...props} />
+  ),
+  a: (props: any) => <a className="text-blue-500 hover:underline" {...props} />,
+  ul: (props: any) => (
+    <ul className="mb-4 ml-6 list-disc text-foreground-muted" {...props} />
+  ),
+  ol: (props: any) => (
+    <ol className="mb-4 ml-6 list-decimal text-foreground-muted" {...props} />
+  ),
   li: (props: any) => <li className="mb-2" {...props} />,
   code: (props: any) => (
     <code
+      className="bg-foreground/10 px-1.5 py-0.5 rounded text-sm"
       className="bg-foreground/10 px-1.5 py-0.5 rounded text-sm"
       {...props}
     />
@@ -33,11 +44,13 @@ const components = {
   pre: (props: any) => (
     <pre
       className="bg-foreground/10 p-4 rounded-lg overflow-x-auto mb-4"
+      className="bg-foreground/10 p-4 rounded-lg overflow-x-auto mb-4"
       {...props}
     />
   ),
   blockquote: (props: any) => (
     <blockquote
+      className="border-l-4 border-border pl-4 italic my-4"
       className="border-l-4 border-border pl-4 italic my-4"
       {...props}
     />
@@ -81,6 +94,7 @@ export default async function PostPage({ slug, locale }: PostPageProps) {
         </div>
       )}
       <h1 className="text-3xl font-medium mb-3">{post.title}</h1>
+      <div className="text-foreground-subtle text-sm">
       <div className="text-foreground-subtle text-sm">
         <time>{post.date}</time>
       </div>
