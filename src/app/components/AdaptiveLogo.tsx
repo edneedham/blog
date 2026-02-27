@@ -5,8 +5,6 @@
 import Image from 'next/image'
 import { useTheme } from 'next-themes'
 import { useEffect, useState } from 'react'
-import { useTheme } from 'next-themes'
-import { useEffect, useState } from 'react'
 
 interface AdaptiveLogoProps {
   lightSrc: string
