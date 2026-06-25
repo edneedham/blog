@@ -64,13 +64,13 @@ export default async function PostPage({ slug, locale }: PostPageProps) {
       {post.category === 'en-punto' && (
         <div className="flex items-center mb-2">
           {locale === 'es' ? (
-            <h3 className="text-l font-medium pr-2 text-foreground-subtle">
+            <h2 className="text-lg font-medium pr-2 text-foreground-subtle">
               En Punto
-            </h3>
+            </h2>
           ) : (
-            <h3 className="text-l font-medium pr-2 text-foreground-subtle">
+            <h2 className="text-lg font-medium pr-2 text-foreground-subtle">
               En Punto
-            </h3>
+            </h2>
           )}
           <Image
             src="/enpunto.webp"

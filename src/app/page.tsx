@@ -1,3 +1,4 @@
+import { Fragment } from 'react'
 import { getAllPosts } from '@/app/lib/mdx'
 import SectionCard from './components/SectionCard'
 import Header from './components/Header'
@@ -44,10 +45,6 @@ export default async function Home({ searchParams }: HomeProps) {
     {
       key: 'en-punto',
       title: 'En Punto',
-      description:
-        selectedLanguage === 'es'
-          ? 'Problemas de ingeniería que hemos enfrentado al desarrollar En Punto y cómo los resolvimos.'
-          : "Engineering problems we've faced while developing En Punto and how we solved them.",
       posts: devDiaries,
       locale: selectedLanguage,
       logo: '/enpunto.webp',
@@ -60,15 +57,18 @@ export default async function Home({ searchParams }: HomeProps) {
   return (
     <div>
       <Header selectedLanguage={selectedLanguage} />
-      {sortedSections.map((section) => (
-        <SectionCard
-          key={section.key}
-          title={section.title}
-          description={section.description}
-          posts={section.posts}
-          locale={section.locale}
-          logo={section.logo}
-        />
+      {sortedSections.map((section, index) => (
+        <Fragment key={section.key}>
+          {index > 0 && (
+            <hr className="my-12 border-0 border-t border-border" />
+          )}
+          <SectionCard
+            title={section.title}
+            posts={section.posts}
+            locale={section.locale}
+            logo={section.logo}
+          />
+        </Fragment>
       ))}
     </div>
   )
