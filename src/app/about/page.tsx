@@ -59,7 +59,7 @@ export default function AboutPage() {
             that transforms paper-based delivery notes into digital records.
             This removes errors, reduces paper costs and improves auditability, 
             efficiency and speed. I took advantage of the improved quality of LLMs to
-            translate the UIs into idiomatic Castellano. While building
+            translate the user interfaces into idiomatic Castellano. While building
             En Punto, I created a local-first credential manager
             written in Rust called{' '}
             <a
