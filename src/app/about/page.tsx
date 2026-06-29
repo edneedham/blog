@@ -29,7 +29,7 @@ export default function AboutPage() {
               href="https://github.com/edneedham/x2y"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline text-black"
+              className="text-foreground underline hover:opacity-60 transition-opacity"
             >
               x2y
             </a>{' '}
@@ -42,7 +42,7 @@ export default function AboutPage() {
               href="https://roasal.com.ar"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline text-black"
+              className="text-foreground underline hover:opacity-60 transition-opacity"
             >
               Roasal
             </a>{' '}
@@ -52,7 +52,7 @@ export default function AboutPage() {
               href="https://enpunto.com.ar"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline text-black"
+              className="text-foreground underline hover:opacity-60 transition-opacity"
             >
               En Punto
             </a>{' '}
@@ -66,7 +66,7 @@ export default function AboutPage() {
               href="https://github.com/edneedham/cred"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline text-black"
+              className="text-foreground underline hover:opacity-60 transition-opacity"
             >
               cred
             </a>{' '}
@@ -77,7 +77,7 @@ export default function AboutPage() {
               href="https://github.com/edneedham/netpulse"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline text-black"
+              className="text-foreground underline hover:opacity-60 transition-opacity"
             >
               netpulse
             </a>{', '}
