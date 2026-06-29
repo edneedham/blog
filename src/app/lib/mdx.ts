@@ -5,24 +5,25 @@ import matter from 'gray-matter'
 export interface PostMetadata {
   title: string
   date: string
-  excerpt: string
+  excerpt?: string
   author?: string
   tags?: string[]
   category?: string
   language?: string
   slug: string
-  locale?: string
 }
 
 export interface Post extends PostMetadata {
   content: string
 }
 
-export function getAllPosts(locale?: string): PostMetadata[] {
-  const postsDirectory = locale
-    ? path.join(process.cwd(), `/src/app/${locale}/posts`)
-    : path.join(process.cwd(), '/src/app/posts')
+const postsDirectory = path.join(process.cwd(), '/src/app/posts')
 
+export function getPostYear(date: string): string {
+  return date.slice(0, 4)
+}
+
+export function getAllPosts(): PostMetadata[] {
   const fileNames = fs.readdirSync(postsDirectory)
   const allPostsData = fileNames
     .filter((fileName) => fileName.endsWith('.mdx'))
@@ -35,21 +36,14 @@ export function getAllPosts(locale?: string): PostMetadata[] {
       return {
         slug,
         ...data,
-        locale: locale || 'en',
       } as PostMetadata
     })
 
   return allPostsData.sort((a, b) => (a.date < b.date ? 1 : -1))
 }
 
-export async function getPostBySlug(
-  slug: string,
-  locale?: string
-): Promise<Post | null> {
+export async function getPostBySlug(slug: string): Promise<Post | null> {
   try {
-    const postsDirectory = locale
-      ? path.join(process.cwd(), `/src/app/${locale}/posts`)
-      : path.join(process.cwd(), '/src/app/posts')
     const fullPath = path.join(postsDirectory, `${slug}.mdx`)
     const fileContents = fs.readFileSync(fullPath, 'utf8')
     const { data, content } = matter(fileContents)
@@ -57,7 +51,6 @@ export async function getPostBySlug(
     return {
       slug,
       ...data,
-      locale: locale || 'en',
       content,
     } as Post
   } catch {
@@ -66,7 +59,7 @@ export async function getPostBySlug(
 }
 
 export function getAllPostSlugs(): string[] {
-  const fileNames = fs.readdirSync(path.join(process.cwd(), '/src/app/posts'))
+  const fileNames = fs.readdirSync(postsDirectory)
   return fileNames
     .filter((fileName) => fileName.endsWith('.mdx'))
     .map((fileName) => fileName.replace(/\.mdx$/, ''))

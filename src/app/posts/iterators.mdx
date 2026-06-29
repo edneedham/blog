@@ -1,7 +1,6 @@
 ---
 date: '2023-02-01'
-title: 'Iterating Through Trees In Rust'
-excerpt: 'Discussion on implementing iterators for tree-like data structures.'
+title: 'Iterating through trees in Rust'
 tags: ['Rust', 'Iterators', 'Trees']
 category: 'general'
 language: 'en'
@@ -642,7 +641,7 @@ According to the official Rust docs under [BTreeMap](https://doc.Rust-lang.org/s
 wildly inefficient. Each node added to the tree triggers a heap allocation
 and because we do not allocate a large contiguous block such as with
 a fixed-size structure, the memory is all fragmented so there is no way
-for the CPU caches to utilize the data structure, Figure 1 illustrates this:
+for the CPU caches to utilise the data structure, Figure 1 illustrates this:
 
 ![Figure 1: Fragmented vs. Contiguous Memory](/img/fragmented-mem.svg)
 

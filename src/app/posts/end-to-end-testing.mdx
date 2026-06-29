@@ -1,6 +1,6 @@
 ---
 date: '2025-11-03'
-title: 'Solving End-to-End Testing Issues at En Punto'
+title: 'Solving end-to-end testing issues at En Punto'
 tags: ['Testing', 'End-to-End Testing', 'En Punto']
 category: 'en-punto'
 language: 'en'
@@ -53,12 +53,12 @@ always wanted it to be). We could reuse the same Docker Compose file used in pro
 same API. This means no mocks to maintain or keep in sync. Ultimately, this gives us high confidence that a passing test
 equates to a working feature for a real user.
 
-## Tradeoffs and Lessons Learned
+## Trade-offs and Lessons Learned
 
 This has by no means been a silver bullet. The tests take longer because we are actually sending requests
 to the API over the network. The test runner uses up more memory and CPU resources which increases costs. Keeping tests
 isolated and repeatable, however, requires a solid seeding process to ensure database consistency. To balance these
-tradeoffs, we only run tests that are relevant to the code we change, removing the need to run the entire E2E test suite
+trade-offs, we only run tests that are relevant to the code we change, removing the need to run the entire E2E test suite
 every time we run the CI process. And we adapted our seeding API that we use for production and staging environments to
 also be used in the tests, keeping the test data consistent.
 

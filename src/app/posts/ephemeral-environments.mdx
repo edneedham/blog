@@ -1,6 +1,6 @@
 ---
 date: '2025-12-30'
-title: 'Switching to Ephemeral Preview Environments'
+title: 'Switching to ephemeral preview environments'
 tags: ['Testing', 'Infrastructure', 'En Punto']
 category: 'en-punto'
 language: 'en'
@@ -20,9 +20,9 @@ but it comes with new maintenance (especially around seed data).
 
 ## What broke at scale
 
-As a reminder, we made the tradeoff to dockerise the end-to-end (E2E) testing infrastructure so the
+As a reminder, we made the trade-off to dockerise the end-to-end (E2E) testing infrastructure so the
 environment behaves like a mirror of production, allowing E2E tests to run as if they were a real user.
-There were issues with our approach; it was a tradeoff after all.
+There were issues with our approach; it was a trade-off after all.
 
 Previously, every time we created a new PR we triggered unit and integration tests. We could also trigger
 E2E tests if we wanted. The app would deploy and it could be manually tested too.
@@ -77,4 +77,4 @@ and storage needed in Neon, reducing costs.
 Is this new workflow perfect? No. Seed data is now part of the cost: we need to keep the lightweight seeder
 aligned with what we expect to see in the app for each change. In return we’ve removed the deployment
 bottleneck, every PR gets its own preview, so we can validate behaviour before merging to production. Software
-engineering is a game of tradeoffs.
+engineering is a game of trade-offs.

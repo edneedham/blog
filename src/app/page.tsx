@@ -3,50 +3,23 @@ import { getAllPosts } from '@/app/lib/mdx'
 import SectionCard from './components/SectionCard'
 import Header from './components/Header'
 
-interface HomeProps {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
-}
-
-export default async function Home({ searchParams }: HomeProps) {
-  const params = await searchParams
-  const selectedLanguage = (params.lang as string) || 'en'
-
-  // Get posts from both locales
-  const englishPosts = getAllPosts().map((post) => ({ ...post, locale: 'en' }))
-  const spanishPosts = getAllPosts('es').map((post) => ({
-    ...post,
-    locale: 'es',
-  }))
-  const allPosts = [...englishPosts, ...spanishPosts].sort((a, b) =>
-    a.date < b.date ? 1 : -1
-  )
-
-  // Get the latest post (first in sorted array)
+export default async function Home() {
+  const allPosts = getAllPosts()
   const latestPost = allPosts[0]
 
-  // Filter posts by selected language only
-  const generalPosts = allPosts.filter(
-    (post) => post.category === 'general' && post.locale === selectedLanguage
-  )
-  const devDiaries = allPosts.filter(
-    (post) => post.category === 'en-punto' && post.locale === selectedLanguage
-  )
+  const generalPosts = allPosts.filter((post) => post.category === 'general')
+  const devDiaries = allPosts.filter((post) => post.category === 'en-punto')
 
   const sections = [
     {
       key: 'general',
-      title:
-        selectedLanguage === 'es'
-          ? 'General'
-          : 'General',
-      locale: selectedLanguage,
+      title: 'General',
       posts: generalPosts,
     },
     {
       key: 'en-punto',
       title: 'En Punto',
       posts: devDiaries,
-      locale: selectedLanguage,
       logo: '/enpunto.webp',
     },
   ]
@@ -56,7 +29,7 @@ export default async function Home({ searchParams }: HomeProps) {
 
   return (
     <div>
-      <Header selectedLanguage={selectedLanguage} />
+      <Header />
       {sortedSections.map((section, index) => (
         <Fragment key={section.key}>
           {index > 0 && (
@@ -65,7 +38,6 @@ export default async function Home({ searchParams }: HomeProps) {
           <SectionCard
             title={section.title}
             posts={section.posts}
-            locale={section.locale}
             logo={section.logo}
           />
         </Fragment>

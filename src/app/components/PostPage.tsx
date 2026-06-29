@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { getPostBySlug } from '@/app/lib/mdx'
+import { getPostBySlug, getPostYear } from '@/app/lib/mdx'
 import CICDWorkflow, { OldCICDWorkflow } from '@/app/components/CI-CD'
 import { MDXRemote } from 'next-mdx-remote/rsc'
 import Header from './Header'
@@ -48,11 +48,10 @@ const components = {
 
 interface PostPageProps {
   slug: string
-  locale?: string
 }
 
-export default async function PostPage({ slug, locale }: PostPageProps) {
-  const post = await getPostBySlug(slug, locale)
+export default async function PostPage({ slug }: PostPageProps) {
+  const post = await getPostBySlug(slug)
 
   if (!post) {
     notFound()
@@ -63,26 +62,20 @@ export default async function PostPage({ slug, locale }: PostPageProps) {
       <Header />
       {post.category === 'en-punto' && (
         <div className="flex items-center mb-2">
-          {locale === 'es' ? (
-            <h2 className="text-lg font-medium pr-2 text-foreground-subtle">
-              En Punto
-            </h2>
-          ) : (
-            <h2 className="text-lg font-medium pr-2 text-foreground-subtle">
-              En Punto
-            </h2>
-          )}
+          <h2 className="text-lg font-medium pr-2 text-foreground-subtle">
+            En Punto
+          </h2>
           <Image
             src="/enpunto.webp"
             width="16"
             height="16"
-            alt="en punto logo"
+            alt="En Punto logo"
           />
         </div>
       )}
       <h1 className="text-3xl font-medium mb-3">{post.title}</h1>
       <div className="text-foreground-subtle text-sm">
-        <time>{post.date}</time>
+        <time dateTime={post.date}>{getPostYear(post.date)}</time>
       </div>
       <div className="prose-custom">
         <MDXRemote source={post.content} components={components} />
