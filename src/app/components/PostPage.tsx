@@ -2,7 +2,6 @@ import { notFound } from 'next/navigation'
 import { getPostBySlug, getPostYear } from '@/app/lib/mdx'
 import CICDWorkflow, { OldCICDWorkflow } from '@/app/components/CI-CD'
 import { MDXRemote } from 'next-mdx-remote/rsc'
-import Header from './Header'
 import Image from 'next/image'
 
 const components = {
@@ -58,8 +57,7 @@ export default async function PostPage({ slug }: PostPageProps) {
   }
 
   return (
-    <article className="max-w-2xl mx-auto">
-      <Header />
+    <article>
       {post.category === 'en-punto' && (
         <div className="flex items-center mb-2">
           <h2 className="text-lg font-medium pr-2 text-foreground-subtle">

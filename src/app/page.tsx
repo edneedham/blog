@@ -1,7 +1,6 @@
 import { Fragment } from 'react'
 import { getAllPosts } from '@/app/lib/mdx'
 import SectionCard from './components/SectionCard'
-import Header from './components/Header'
 
 export default async function Home() {
   const allPosts = getAllPosts()
@@ -28,8 +27,7 @@ export default async function Home() {
     latestPost?.category === 'en-punto' ? [...sections].reverse() : sections
 
   return (
-    <div>
-      <Header />
+    <>
       {sortedSections.map((section, index) => (
         <Fragment key={section.key}>
           {index > 0 && (
@@ -42,6 +40,6 @@ export default async function Home() {
           />
         </Fragment>
       ))}
-    </div>
+    </>
   )
 }

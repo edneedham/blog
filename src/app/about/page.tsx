@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import Header from '../components/Header'
 
 export const metadata: Metadata = {
   title: 'About | Edward Needham',
@@ -8,9 +7,7 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <div>
-      <Header />
-      <article className="max-w-2xl mx-auto">
+    <article>
         <h1 className="text-3xl font-medium mb-6">About</h1>
         <div className="space-y-4 text-foreground-muted leading-7">
           <p>
@@ -92,6 +89,5 @@ export default function AboutPage() {
           </p>
         </div>
       </article>
-    </div>
   )
 }
