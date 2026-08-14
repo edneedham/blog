@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { getPostBySlug, getPostYear } from '@/app/lib/mdx'
 import CICDWorkflow, { OldCICDWorkflow } from '@/app/components/CI-CD'
+import WireGaugeCalculator from '@/app/components/WireGaugeCalculator'
 import { MDXRemote } from 'next-mdx-remote/rsc'
 import Image from 'next/image'
 
@@ -43,6 +44,7 @@ const components = {
   ),
   CICDWorkflow,
   OldCICDWorkflow,
+  WireGaugeCalculator,
 }
 
 interface PostPageProps {
@@ -71,11 +73,11 @@ export default async function PostPage({ slug }: PostPageProps) {
           />
         </div>
       )}
-      <h1 className="text-3xl font-medium mb-3">{post.title}</h1>
-      <div className="text-foreground-subtle text-sm">
+      <h1 className="text-3xl font-medium mb-4">{post.title}</h1>
+      <div className="text-foreground-subtle text-sm mb-10">
         <time dateTime={post.date}>{getPostYear(post.date)}</time>
       </div>
-      <div className="prose-custom">
+      <div className="prose-custom [&>:first-child]:mt-0">
         <MDXRemote source={post.content} components={components} />
       </div>
     </article>
