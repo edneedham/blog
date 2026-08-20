@@ -1,0 +1,90 @@
+---
+date: '2026-08-17'
+title: 'Replace a missing Meaco fan remote with your phone or laptop'
+tags: ['electronics', 'infrared', 'esp32']
+category: 'general'
+language: 'en'
+---
+
+I recently took ownership of a Meaco 1056AC desk fan and it seems to 
+be missing the remote. This remote (if I had it) talks IR, like a TV remote, and I just happened to have a 940nm IR LED.
+
+Starting with the hardware: I used a half breadboard, an ESP32-S3 baguette, a single jumper wire, a 220 Ohm resistor and the 940nm IR LED.
+
+<figure>
+  <img src="/meaco-breadboard.png" alt="Breadboard showing connected pins, 220 ohm resistor, IR LED and connecting wire" />
+  <figcaption>Figure 1. Complete breadboard. Note: Power is 3.3 V at the pin via 5 V USB-C</figcaption>
+</figure>
+
+<figure>
+  <img className="w-full" src="/meaco-ir.svg" alt="GPIO4 to 220 ohm resistor to IR LED to ground" />
+  <figcaption>Figure 2. Schematic of the IR LED drive.</figcaption>
+</figure>
+
+The LED has a forward voltage (the voltage across the LED when it is on) of ≈1.2 V. With no resistor the LED would have the full 3.3 V across it pulling too much current through the GPIO4 pin, potentially damaging it. 
+
+**We are estimating that the pin resistance across the board is ≈40 ohms.**
+
+$$
+I \approx \frac{3.3\,\mathrm{V} - 1.2\,\mathrm{V}}{40\,\Omega} \approx 50\,\mathrm{mA}
+$$
+
+
+If we add a 220 ohm resistor we can set the current in the loop to safer levels, therefore sparing the GPIO4 pin from harm.
+$$
+I \approx \frac{3.3\,\mathrm{V} - 1.2\,\mathrm{V}}{220\,\Omega} \approx 9.5\,\mathrm{mA}
+$$
+
+<figure>
+  <img src="/meaco-board-powered.png" alt="Showing the breadboard with power next to the fan base" />
+  <figcaption>Figure 3. Powered board next to the fan base.</figcaption>
+</figure>
+
+You might be thinking that a breadboard sat right next to the fan receiver doesn't look very remote... well you would be right. This is because it has to sit on the IR window. And it doesn't need to move (unless the fan moves) as we can connect to the ESP32 on its own network, allowing us to control it from a phone or laptop as long as we are connected.
+
+To get connected we need to be able to talk to the ESP32. We create a hotspot for the ESP32 so that we can connect to it. 
+
+```cpp
+WiFi.mode(WIFI_AP);
+WiFi.softAP("Meaco-Fan", "meacofan1");
+server.begin();
+```
+
+If we join the Meaco-Fan hotspot and open a browser window on a phone or laptop and type `http://192.168.4.1/` we can send requests to the board.
+
+<figure>
+  <img className="w-full" src="/web-ui.png" alt="Web interface to control the fan" />
+  <figcaption>Figure 4. Fan Controls.</figcaption>
+</figure>
+
+Next up, how the buttons become numbers:
+```cpp
+void handle(const char* name, uint8_t cmd) {
+  pendingCmd = cmd;
+  server.send(200, "text/plain", name);
+}
+
+server.on("/power", [] { handle("power", 0x92); });
+```
+The page hits `/power`; this just queues 0x92, the reply is made first, then the IR is sent a moment later, ensuring the Wi-Fi does not stall.
+
+And here is how that number becomes IR:
+```cpp
+void loop() {
+  server.handleClient();
+  if (pendingCmd >= 0) {
+    uint8_t cmd = pendingCmd;
+    pendingCmd = -1;
+    sendNec(0x80, cmd);
+  }
+}
+```
+0x80 is the fan, cmd is the button (if you follow the previous example, power). Then sendNec wiggles GPIO4 in the NEC pattern.
+
+Power on the fan is a toggle, so the sketch sends that code once. If we send it twice then we turn the fan on and straight back off.
+
+The rest of the firmware is just timing for this pattern. The full sketch is on [GitHub](https://github.com/edneedham/meaco-ir).
+
+
+
+
